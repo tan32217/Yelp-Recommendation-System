@@ -1,113 +1,65 @@
-Hybrid Recommendation System: XGBoost + SVD + Ridge Regression
-This project implements a hybrid recommendation system designed for rating prediction by combining the strengths of both feature-based learning (XGBoost) and collaborative filtering (SVD). The final prediction is computed using a meta-model based on Ridge Regression, which blends the outputs of both models.
+# 📚 Hybrid Recommendation System (XGBoost + SVD + Ridge Regression)
 
-🔍 Overview
-In this solution, we aim to improve prediction accuracy by:
+This project implements a **hybrid rating prediction system** for the Yelp dataset, combining structured feature learning via **XGBoost** and collaborative filtering via **SVD**, with final predictions blended using **Ridge Regression**.
 
-Engineering robust user-business interaction features from multiple sources (user.json, business.json, tip.json, photo.json, checkin.json, review_train.json)
+---
 
-Training an XGBoost Regressor using the structured feature data
+## 📌 Overview
 
-Leveraging SVD (Singular Value Decomposition) for collaborative filtering signals
+The system is designed to improve RMSE by combining:
+- 🔍 **Feature-based learning** using XGBoost on structured user-business interaction data
+- 🎯 **Collaborative filtering** using SVD (Singular Value Decomposition)
+- ⚖️ **Meta-model blending** using Ridge Regression to learn the optimal combination of predictions
 
-Combining both model predictions via Ridge Regression to form a blended meta-model
+📉 **Final RMSE**: `0.9776`  
+⏱ **Runtime**: ~140 seconds
 
-Achieving a test RMSE of 0.9776, improving upon standalone methods
+---
 
-📂 Input Files
-All data files should be placed in a single folder (<data_folder>) and include:
+## 🧠 Feature Engineering
 
-yelp_train.csv
+### 👤 User Features
+- `review_count`, `useful`, `fans`, `average_stars`, `funny`, `cool`
+- `elite_years`, `friend_count`, `compliment_sum`
 
-business.json
+### 🏪 Business Features
+- `stars`, `review_count`, `RestaurantsPriceRange2`, `is_open`
+- `HasTV`, `RestaurantsTakeOut`, `OutdoorSeating`, `WiFi`
+- `checkin_count`, `photo_count`, `tip_count`, `avg_tip_length`
 
-user.json
+### 🔄 Interaction Features
+- `user_avg_stars_diff`, `review_count_diff`, `compliment_to_popularity`
+- `engagement_vs_visibility`, `high_fan_high_star`, `elite_friend_star_diff`
+- `biz_star_minus_user_avg`, `user_review_count_ratio`, `biz_popularity`
 
-checkin.json
+---
 
-photo.json
+## ⚙️ Models Used
 
-tip.json
+### 1. **XGBoost Regressor**
+- Learns from engineered features
+- Tuned parameters:  
+  `max_depth=5`, `learning_rate=0.03`, `n_estimators=1000`,  
+  `subsample=0.9`, `colsample_bytree=0.8`, `reg_lambda=5.0`, `reg_alpha=2.0`
 
-review_train.json
+### 2. **SVD (Surprise)**
+- Captures latent user-item interactions
+- Parameters: `n_factors=50`, `n_epochs=20`, `lr_all=0.005`, `reg_all=0.1`
 
-<test_file.csv> (test dataset)
+### 3. **Ridge Regression (Meta-model)**
+- Blends predictions from XGBoost and SVD
 
-🧠 Features Engineered
-From multiple JSON sources:
+---
 
-User Features:
-review_count, useful, fans, average_stars, funny, cool, elite_years, friend_count, compliment_sum
+## 📈 Performance
 
-Business Features:
-stars, review_count, price_range, is_open, HasTV, RestaurantsTakeOut, OutdoorSeating, WiFi, checkin_count, photo_count, tip_count, avg_tip_length
+### 🔍 Prediction Error Breakdown
 
-Interaction Features:
-user_avg_stars_diff, review_count_diff, compliment_to_popularity
+| Error Range     | Count     |
+|------------------|-----------|
+| ≥0 and <1        | 102,428   |
+| ≥1 and <2        | 32,635    |
+| ≥2 and <3        | 6,145     |
+| ≥3 and <4        | 835       |
+| ≥4               | 1         |
 
-engagement_vs_visibility, high_fan_high_star, elite_friend_star_diff
-
-📈 Models Used
-1. XGBoost Regressor
-Learns from structured features
-
-Tuned with regularization and depth settings
-
-2. SVD (Surprise)
-Collaborative filtering based on user-item interactions
-
-Learns latent signals using n_factors=50, n_epochs=20
-
-3. Ridge Regression
-Meta-model that blends predictions from XGBoost and SVD
-
-🏁 Output
-The final output CSV contains:
-
-Copy
-Edit
-user_id,business_id,prediction
-Additionally, train_data_interactions.csv and test_data_interactions.csv are saved for further analysis.
-
-🚀 How to Run
-bash
-Copy
-Edit
-python hybrid_model.py <data_folder_path> <test_file_path> <output_file_path>
-Example:
-
-bash
-Copy
-Edit
-python hybrid_model.py ./data ./data/test.csv predictions.csv
-📊 Evaluation
-Final RMSE: 0.9776
-Prediction Error Breakdown:
-
->=0 and <1: 102,428
-
->=1 and <2: 32,635
-
->=2 and <3: 6,145
-
->=3 and <4: 835
-
->=4: 1
-
-⏱️ Performance
-Total Execution Time: ~140 seconds (varies by system)
-
-🧰 Requirements
-Python 3.8+
-
-PySpark
-
-XGBoost
-
-Pandas
-
-NumPy
-
-Surprise
-
-scikit-learn
